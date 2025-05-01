@@ -13,9 +13,6 @@ class Neo4jDatabase:
             session.run("CREATE CONSTRAINT user_username IF NOT EXISTS FOR (u:User) REQUIRE u.username IS UNIQUE")
             session.run("CREATE CONSTRAINT user_email IF NOT EXISTS FOR (u:User) REQUIRE u.email IS UNIQUE")
 
-    def _hash_password(self, password: str) -> str:
-        return hashlib.sha256(password.encode()).hexdigest()
-
     def create_user(self, name: str, email: str, username: str, password: str, bio: str = "") -> bool:
         with self.driver.session() as session:
             try:
@@ -33,7 +30,7 @@ class Neo4jDatabase:
                     name=name,
                     email=email,
                     username=username,
-                    password=self._hash_password(password),
+                    password=password,
                     bio=bio
                 )
                 return result.single() is not None
@@ -48,7 +45,7 @@ class Neo4jDatabase:
                 RETURN u
                 """,
                 username=username,
-                password=self._hash_password(password)
+                password=password
             )
             record = result.single()
             if record:
