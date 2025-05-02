@@ -57,6 +57,25 @@ class Neo4jDatabase:
                     "bio": user.get("bio", "")
                 }
             return None
+    # This is for test code to view profile
+    def get_user_profile(self, username: str) -> Optional[Dict]:
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (u:User {username: $username})
+                RETURN u.name AS name, u.username AS username, u.email AS email, u.bio AS bio
+                """,
+                username=username
+            )
+            record = result.single()
+            if record:
+                return {
+                    "name": record["name"],
+                    "username": record["username"],
+                    "email": record["email"],
+                    "bio": record["bio"]
+                }
+            return None
 
     def update_user(self, username: str, name: str, email: str, bio: str) -> bool:
         with self.driver.session() as session:
